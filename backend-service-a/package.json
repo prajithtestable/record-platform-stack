@@ -1,0 +1,23 @@
+{
+  "name": "backend-service-a",
+  "version": "1.0.0",
+  "private": true,
+  "description": "gRPC server owning MongoDB, exposes REST for the Angular frontend",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.14.5",
+    "@grpc/proto-loader": "^0.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "mongoose": "^9.10.1"
+  }
+}

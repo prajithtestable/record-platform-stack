@@ -1,0 +1,83 @@
+services:
+  mongo:
+    image: mongo:8
+    container_name: record-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    container_name: record-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+
+  localstack:
+    image: localstack/localstack:3
+    container_name: record-localstack
+    environment:
+      - SERVICES=sns,ses,sqs
+      - DEFAULT_REGION=us-east-1
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack-data:/var/lib/localstack
+
+  backend-service-a:
+    build:
+      context: .
+      dockerfile: backend-service-a/Dockerfile
+    container_name: record-service-a
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/records
+      - GRPC_PORT=50051
+      - HTTP_PORT=3001
+    ports:
+      - "3001:3001"
+      - "50051:50051"
+
+  backend-service-b:
+    build:
+      context: .
+      dockerfile: backend-service-b/Dockerfile
+    container_name: record-service-b
+    depends_on:
+      - elasticsearch
+      - localstack
+      - backend-service-a
+    environment:
+      - SERVICE_A_GRPC_ADDR=backend-service-a:50051
+      - ELASTICSEARCH_NODE=http://elasticsearch:9200
+      - AWS_ENDPOINT=http://localstack:4566
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - SNS_TOPIC_ARN=arn:aws:sns:us-east-1:000000000000:record-created
+      - SES_FROM_EMAIL=notifications@record-platform.local
+      - SES_TO_EMAIL=ops@record-platform.local
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: record-frontend
+    depends_on:
+      - backend-service-a
+    ports:
+      - "4200:4200"
+    environment:
+      - API_BASE_URL=http://localhost:3001
+
+volumes:
+  mongo-data:
+  es-data:
+  localstack-data:

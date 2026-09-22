@@ -1,0 +1,45 @@
+<main class="records-page">
+  <h1>Records</h1>
+
+  <form (ngSubmit)="submit()" class="record-form">
+    <input
+      name="title"
+      [(ngModel)]="title"
+      placeholder="Title"
+      required
+    />
+    <input
+      name="description"
+      [(ngModel)]="description"
+      placeholder="Description"
+    />
+    <button type="submit">Create record</button>
+  </form>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p>Loading...</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (record of records(); track record.id) {
+          <tr>
+            <td>{{ record.title }}</td>
+            <td>{{ record.description }}</td>
+            <td>{{ record.createdAt }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</main>

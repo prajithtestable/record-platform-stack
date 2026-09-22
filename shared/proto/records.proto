@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package records;
+
+// RecordService is served by backend-service-a and consumed by backend-service-b.
+service RecordService {
+  // Unary lookup, used by service-b for point lookups.
+  rpc GetRecord (GetRecordRequest) returns (Record);
+
+  // Server-streaming feed of newly created records. service-b subscribes to
+  // this on startup and reacts to each record as it arrives.
+  rpc WatchRecords (WatchRecordsRequest) returns (stream Record);
+}
+
+message GetRecordRequest {
+  string id = 1;
+}
+
+message WatchRecordsRequest {
+  // Reserved for future filtering (e.g. resume token). Empty = all records.
+}
+
+message Record {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string created_at = 4;
+}

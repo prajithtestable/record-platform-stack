@@ -1,0 +1,23 @@
+{
+  "name": "backend-service-b",
+  "version": "1.0.0",
+  "private": true,
+  "description": "gRPC client of service-a; indexes into Elasticsearch, publishes SNS events, sends SES email",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.1137.0",
+    "@aws-sdk/client-sns": "^3.1137.0",
+    "@elastic/elasticsearch": "^9.5.1",
+    "@grpc/grpc-js": "^1.14.5",
+    "@grpc/proto-loader": "^0.8.1",
+    "dotenv": "^16.4.5"
+  }
+}

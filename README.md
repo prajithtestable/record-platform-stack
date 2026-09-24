@@ -17,18 +17,21 @@ named stack — the convention already in use on the sibling
 `javascript-combos` and `TypeScript-Repos` corpora (e.g.
 `JS_V12_ESBUILD_NPM_MONO`), not the retired `CE-N{version}-{id}` scheme.
 
-Two stacks currently live here:
+Three stacks currently live here:
 
 | Stack | Branch prefix | Branches | Section |
 | ----- | -------------- | -------- | ------- |
 | record-platform-stack (Angular + Node microservices) | `JS_V22_*` | 24 | [below](#stack-record-platform-stack-js_v22) |
 | Digital Sippoy (Next.js full-stack) | `DIGITAL_SIPPOY_JS_V20_*` | 24 | [below](#stack-digital-sippoy-digital_sippoy_js_v20) |
+| Project 1 / 9 Block (React + ASP.NET Core + SQL Server) | `P1_*` | 96 | [below](#stack-project-1--9-block-p1_) |
 
-Both stacks share the same 3 bundlers × 4 package managers × 2
+The first two stacks share the same 3 bundlers × 4 package managers × 2
 architecture-note grid (esbuild / Vite / Rollup × npm / yarn Berry / pnpm /
 bun × Monolith / Microservices = 24 branches each), and both fixed the same
 pnpm/yarn package-manager defects the same way — see each stack's own
-"package-manager notes" section.
+"package-manager notes" section. Project 1 uses a different axis set (SCM ×
+build tool × package manager × architecture) matched to its .NET backend —
+see its own section for details, including an important verification caveat.
 
 ---
 
@@ -250,3 +253,219 @@ branch's own README for exact commands.
 `generate_branches.py` — parameterised bundlers/package
 managers/architectures, regenerates the 24-branch matrix from a template
 directory plus a pre-verified lockfile-set store.
+
+---
+
+## Stack: Project 1 / 9 Block (`P1_*`)
+
+A third, independent stack in this same repo, modeled on a different tech
+spec: "9 Block" — SCM (GitHub / Bitbucket / GitLab / Azure) x React frontend
+x ASP.NET Core + SQL Server backend x MVC development style. Same testbed
+intent as the other two stacks: real dependencies, real working code, not
+stubs — with one caveat, see "Verification status" below.
+
+### Locked technology baseline
+
+- **Frontend**: ReactJS (Vite-based dev/build tooling)
+- **Backend**: ASP.NET Core 8 Web API
+- **Database**: SQL Server 2022 (via EF Core, `Microsoft.EntityFrameworkCore.SqlServer`)
+- **Development style**: "Entire Architecture (Model, View, Controller)" —
+  Model and Controller are the EF Core entities and ASP.NET Core controllers
+  in `RecordsApi`; View is realized as the separately-served React SPA in
+  `ClientApp` rather than Razor views, since this is an API + SPA pairing
+  rather than a server-rendered MVC app. Documented per-branch rather than
+  silently assumed.
+
+### Repository shape
+
+Identical on every `P1_*` branch:
+
+```
+/ClientApp               React (Vite) app — Records list/add/delete UI, calls RecordsApi over HTTP
+/RecordsApi               ASP.NET Core 8 Web API — Records CRUD controller, EF Core DbContext, SQL Server
+docker-compose.yml        SQL Server 2022 + RecordsApi + ClientApp (nginx-served build)
+```
+
+**Flow**: the React SPA calls `RecordsApi`'s `/api/records` endpoints
+(GET/POST/PUT/DELETE) → `RecordsController` uses `AppDbContext` (EF Core) to
+read/write the `Records` table in SQL Server, creating the schema on startup
+via `EnsureCreated()`.
+
+### Branch matrix (96 branches)
+
+4 SCMs × 3 build tools × 4 package managers × 2 architecture-note labels.
+
+| Branch | SCM | Build Tool | Package Manager | Architecture note |
+| ------ | --- | ---------- | ---------------- | ------------------ |
+| P1_GITHUB_REACT_DOTNETCORE_MSBUILD_NUGETPKGREF_MVC_MONO | GitHub | SDK-style MSBuild | NuGet (PackageReference) | Monolith |
+| P1_GITHUB_REACT_DOTNETCORE_MSBUILD_NUGETPKGREF_MVC_MICRO | GitHub | SDK-style MSBuild | NuGet (PackageReference) | Microservices |
+| P1_GITHUB_REACT_DOTNETCORE_MSBUILD_CPM_MVC_MONO | GitHub | SDK-style MSBuild | Central Package Management | Monolith |
+| P1_GITHUB_REACT_DOTNETCORE_MSBUILD_CPM_MVC_MICRO | GitHub | SDK-style MSBuild | Central Package Management | Microservices |
+| P1_GITHUB_REACT_DOTNETCORE_MSBUILD_PAKET_MVC_MONO | GitHub | SDK-style MSBuild | Paket | Monolith |
+| P1_GITHUB_REACT_DOTNETCORE_MSBUILD_PAKET_MVC_MICRO | GitHub | SDK-style MSBuild | Paket | Microservices |
+| P1_GITHUB_REACT_DOTNETCORE_MSBUILD_NUGETCONFIG_MVC_MONO | GitHub | SDK-style MSBuild | NuGet (packages.config) | Monolith |
+| P1_GITHUB_REACT_DOTNETCORE_MSBUILD_NUGETCONFIG_MVC_MICRO | GitHub | SDK-style MSBuild | NuGet (packages.config) | Microservices |
+| P1_GITHUB_REACT_DOTNETCORE_CAKE_NUGETPKGREF_MVC_MONO | GitHub | Cake | NuGet (PackageReference) | Monolith |
+| P1_GITHUB_REACT_DOTNETCORE_CAKE_NUGETPKGREF_MVC_MICRO | GitHub | Cake | NuGet (PackageReference) | Microservices |
+| P1_GITHUB_REACT_DOTNETCORE_CAKE_CPM_MVC_MONO | GitHub | Cake | Central Package Management | Monolith |
+| P1_GITHUB_REACT_DOTNETCORE_CAKE_CPM_MVC_MICRO | GitHub | Cake | Central Package Management | Microservices |
+| P1_GITHUB_REACT_DOTNETCORE_CAKE_PAKET_MVC_MONO | GitHub | Cake | Paket | Monolith |
+| P1_GITHUB_REACT_DOTNETCORE_CAKE_PAKET_MVC_MICRO | GitHub | Cake | Paket | Microservices |
+| P1_GITHUB_REACT_DOTNETCORE_CAKE_NUGETCONFIG_MVC_MONO | GitHub | Cake | NuGet (packages.config) | Monolith |
+| P1_GITHUB_REACT_DOTNETCORE_CAKE_NUGETCONFIG_MVC_MICRO | GitHub | Cake | NuGet (packages.config) | Microservices |
+| P1_GITHUB_REACT_DOTNETCORE_CLI_NUGETPKGREF_MVC_MONO | GitHub | .NET CLI | NuGet (PackageReference) | Monolith |
+| P1_GITHUB_REACT_DOTNETCORE_CLI_NUGETPKGREF_MVC_MICRO | GitHub | .NET CLI | NuGet (PackageReference) | Microservices |
+| P1_GITHUB_REACT_DOTNETCORE_CLI_CPM_MVC_MONO | GitHub | .NET CLI | Central Package Management | Monolith |
+| P1_GITHUB_REACT_DOTNETCORE_CLI_CPM_MVC_MICRO | GitHub | .NET CLI | Central Package Management | Microservices |
+| P1_GITHUB_REACT_DOTNETCORE_CLI_PAKET_MVC_MONO | GitHub | .NET CLI | Paket | Monolith |
+| P1_GITHUB_REACT_DOTNETCORE_CLI_PAKET_MVC_MICRO | GitHub | .NET CLI | Paket | Microservices |
+| P1_GITHUB_REACT_DOTNETCORE_CLI_NUGETCONFIG_MVC_MONO | GitHub | .NET CLI | NuGet (packages.config) | Monolith |
+| P1_GITHUB_REACT_DOTNETCORE_CLI_NUGETCONFIG_MVC_MICRO | GitHub | .NET CLI | NuGet (packages.config) | Microservices |
+| P1_BITBUCKET_REACT_DOTNETCORE_MSBUILD_NUGETPKGREF_MVC_MONO | Bitbucket | SDK-style MSBuild | NuGet (PackageReference) | Monolith |
+| P1_BITBUCKET_REACT_DOTNETCORE_MSBUILD_NUGETPKGREF_MVC_MICRO | Bitbucket | SDK-style MSBuild | NuGet (PackageReference) | Microservices |
+| P1_BITBUCKET_REACT_DOTNETCORE_MSBUILD_CPM_MVC_MONO | Bitbucket | SDK-style MSBuild | Central Package Management | Monolith |
+| P1_BITBUCKET_REACT_DOTNETCORE_MSBUILD_CPM_MVC_MICRO | Bitbucket | SDK-style MSBuild | Central Package Management | Microservices |
+| P1_BITBUCKET_REACT_DOTNETCORE_MSBUILD_PAKET_MVC_MONO | Bitbucket | SDK-style MSBuild | Paket | Monolith |
+| P1_BITBUCKET_REACT_DOTNETCORE_MSBUILD_PAKET_MVC_MICRO | Bitbucket | SDK-style MSBuild | Paket | Microservices |
+| P1_BITBUCKET_REACT_DOTNETCORE_MSBUILD_NUGETCONFIG_MVC_MONO | Bitbucket | SDK-style MSBuild | NuGet (packages.config) | Monolith |
+| P1_BITBUCKET_REACT_DOTNETCORE_MSBUILD_NUGETCONFIG_MVC_MICRO | Bitbucket | SDK-style MSBuild | NuGet (packages.config) | Microservices |
+| P1_BITBUCKET_REACT_DOTNETCORE_CAKE_NUGETPKGREF_MVC_MONO | Bitbucket | Cake | NuGet (PackageReference) | Monolith |
+| P1_BITBUCKET_REACT_DOTNETCORE_CAKE_NUGETPKGREF_MVC_MICRO | Bitbucket | Cake | NuGet (PackageReference) | Microservices |
+| P1_BITBUCKET_REACT_DOTNETCORE_CAKE_CPM_MVC_MONO | Bitbucket | Cake | Central Package Management | Monolith |
+| P1_BITBUCKET_REACT_DOTNETCORE_CAKE_CPM_MVC_MICRO | Bitbucket | Cake | Central Package Management | Microservices |
+| P1_BITBUCKET_REACT_DOTNETCORE_CAKE_PAKET_MVC_MONO | Bitbucket | Cake | Paket | Monolith |
+| P1_BITBUCKET_REACT_DOTNETCORE_CAKE_PAKET_MVC_MICRO | Bitbucket | Cake | Paket | Microservices |
+| P1_BITBUCKET_REACT_DOTNETCORE_CAKE_NUGETCONFIG_MVC_MONO | Bitbucket | Cake | NuGet (packages.config) | Monolith |
+| P1_BITBUCKET_REACT_DOTNETCORE_CAKE_NUGETCONFIG_MVC_MICRO | Bitbucket | Cake | NuGet (packages.config) | Microservices |
+| P1_BITBUCKET_REACT_DOTNETCORE_CLI_NUGETPKGREF_MVC_MONO | Bitbucket | .NET CLI | NuGet (PackageReference) | Monolith |
+| P1_BITBUCKET_REACT_DOTNETCORE_CLI_NUGETPKGREF_MVC_MICRO | Bitbucket | .NET CLI | NuGet (PackageReference) | Microservices |
+| P1_BITBUCKET_REACT_DOTNETCORE_CLI_CPM_MVC_MONO | Bitbucket | .NET CLI | Central Package Management | Monolith |
+| P1_BITBUCKET_REACT_DOTNETCORE_CLI_CPM_MVC_MICRO | Bitbucket | .NET CLI | Central Package Management | Microservices |
+| P1_BITBUCKET_REACT_DOTNETCORE_CLI_PAKET_MVC_MONO | Bitbucket | .NET CLI | Paket | Monolith |
+| P1_BITBUCKET_REACT_DOTNETCORE_CLI_PAKET_MVC_MICRO | Bitbucket | .NET CLI | Paket | Microservices |
+| P1_BITBUCKET_REACT_DOTNETCORE_CLI_NUGETCONFIG_MVC_MONO | Bitbucket | .NET CLI | NuGet (packages.config) | Monolith |
+| P1_BITBUCKET_REACT_DOTNETCORE_CLI_NUGETCONFIG_MVC_MICRO | Bitbucket | .NET CLI | NuGet (packages.config) | Microservices |
+| P1_GITLAB_REACT_DOTNETCORE_MSBUILD_NUGETPKGREF_MVC_MONO | GitLab | SDK-style MSBuild | NuGet (PackageReference) | Monolith |
+| P1_GITLAB_REACT_DOTNETCORE_MSBUILD_NUGETPKGREF_MVC_MICRO | GitLab | SDK-style MSBuild | NuGet (PackageReference) | Microservices |
+| P1_GITLAB_REACT_DOTNETCORE_MSBUILD_CPM_MVC_MONO | GitLab | SDK-style MSBuild | Central Package Management | Monolith |
+| P1_GITLAB_REACT_DOTNETCORE_MSBUILD_CPM_MVC_MICRO | GitLab | SDK-style MSBuild | Central Package Management | Microservices |
+| P1_GITLAB_REACT_DOTNETCORE_MSBUILD_PAKET_MVC_MONO | GitLab | SDK-style MSBuild | Paket | Monolith |
+| P1_GITLAB_REACT_DOTNETCORE_MSBUILD_PAKET_MVC_MICRO | GitLab | SDK-style MSBuild | Paket | Microservices |
+| P1_GITLAB_REACT_DOTNETCORE_MSBUILD_NUGETCONFIG_MVC_MONO | GitLab | SDK-style MSBuild | NuGet (packages.config) | Monolith |
+| P1_GITLAB_REACT_DOTNETCORE_MSBUILD_NUGETCONFIG_MVC_MICRO | GitLab | SDK-style MSBuild | NuGet (packages.config) | Microservices |
+| P1_GITLAB_REACT_DOTNETCORE_CAKE_NUGETPKGREF_MVC_MONO | GitLab | Cake | NuGet (PackageReference) | Monolith |
+| P1_GITLAB_REACT_DOTNETCORE_CAKE_NUGETPKGREF_MVC_MICRO | GitLab | Cake | NuGet (PackageReference) | Microservices |
+| P1_GITLAB_REACT_DOTNETCORE_CAKE_CPM_MVC_MONO | GitLab | Cake | Central Package Management | Monolith |
+| P1_GITLAB_REACT_DOTNETCORE_CAKE_CPM_MVC_MICRO | GitLab | Cake | Central Package Management | Microservices |
+| P1_GITLAB_REACT_DOTNETCORE_CAKE_PAKET_MVC_MONO | GitLab | Cake | Paket | Monolith |
+| P1_GITLAB_REACT_DOTNETCORE_CAKE_PAKET_MVC_MICRO | GitLab | Cake | Paket | Microservices |
+| P1_GITLAB_REACT_DOTNETCORE_CAKE_NUGETCONFIG_MVC_MONO | GitLab | Cake | NuGet (packages.config) | Monolith |
+| P1_GITLAB_REACT_DOTNETCORE_CAKE_NUGETCONFIG_MVC_MICRO | GitLab | Cake | NuGet (packages.config) | Microservices |
+| P1_GITLAB_REACT_DOTNETCORE_CLI_NUGETPKGREF_MVC_MONO | GitLab | .NET CLI | NuGet (PackageReference) | Monolith |
+| P1_GITLAB_REACT_DOTNETCORE_CLI_NUGETPKGREF_MVC_MICRO | GitLab | .NET CLI | NuGet (PackageReference) | Microservices |
+| P1_GITLAB_REACT_DOTNETCORE_CLI_CPM_MVC_MONO | GitLab | .NET CLI | Central Package Management | Monolith |
+| P1_GITLAB_REACT_DOTNETCORE_CLI_CPM_MVC_MICRO | GitLab | .NET CLI | Central Package Management | Microservices |
+| P1_GITLAB_REACT_DOTNETCORE_CLI_PAKET_MVC_MONO | GitLab | .NET CLI | Paket | Monolith |
+| P1_GITLAB_REACT_DOTNETCORE_CLI_PAKET_MVC_MICRO | GitLab | .NET CLI | Paket | Microservices |
+| P1_GITLAB_REACT_DOTNETCORE_CLI_NUGETCONFIG_MVC_MONO | GitLab | .NET CLI | NuGet (packages.config) | Monolith |
+| P1_GITLAB_REACT_DOTNETCORE_CLI_NUGETCONFIG_MVC_MICRO | GitLab | .NET CLI | NuGet (packages.config) | Microservices |
+| P1_AZURE_REACT_DOTNETCORE_MSBUILD_NUGETPKGREF_MVC_MONO | Azure DevOps | SDK-style MSBuild | NuGet (PackageReference) | Monolith |
+| P1_AZURE_REACT_DOTNETCORE_MSBUILD_NUGETPKGREF_MVC_MICRO | Azure DevOps | SDK-style MSBuild | NuGet (PackageReference) | Microservices |
+| P1_AZURE_REACT_DOTNETCORE_MSBUILD_CPM_MVC_MONO | Azure DevOps | SDK-style MSBuild | Central Package Management | Monolith |
+| P1_AZURE_REACT_DOTNETCORE_MSBUILD_CPM_MVC_MICRO | Azure DevOps | SDK-style MSBuild | Central Package Management | Microservices |
+| P1_AZURE_REACT_DOTNETCORE_MSBUILD_PAKET_MVC_MONO | Azure DevOps | SDK-style MSBuild | Paket | Monolith |
+| P1_AZURE_REACT_DOTNETCORE_MSBUILD_PAKET_MVC_MICRO | Azure DevOps | SDK-style MSBuild | Paket | Microservices |
+| P1_AZURE_REACT_DOTNETCORE_MSBUILD_NUGETCONFIG_MVC_MONO | Azure DevOps | SDK-style MSBuild | NuGet (packages.config) | Monolith |
+| P1_AZURE_REACT_DOTNETCORE_MSBUILD_NUGETCONFIG_MVC_MICRO | Azure DevOps | SDK-style MSBuild | NuGet (packages.config) | Microservices |
+| P1_AZURE_REACT_DOTNETCORE_CAKE_NUGETPKGREF_MVC_MONO | Azure DevOps | Cake | NuGet (PackageReference) | Monolith |
+| P1_AZURE_REACT_DOTNETCORE_CAKE_NUGETPKGREF_MVC_MICRO | Azure DevOps | Cake | NuGet (PackageReference) | Microservices |
+| P1_AZURE_REACT_DOTNETCORE_CAKE_CPM_MVC_MONO | Azure DevOps | Cake | Central Package Management | Monolith |
+| P1_AZURE_REACT_DOTNETCORE_CAKE_CPM_MVC_MICRO | Azure DevOps | Cake | Central Package Management | Microservices |
+| P1_AZURE_REACT_DOTNETCORE_CAKE_PAKET_MVC_MONO | Azure DevOps | Cake | Paket | Monolith |
+| P1_AZURE_REACT_DOTNETCORE_CAKE_PAKET_MVC_MICRO | Azure DevOps | Cake | Paket | Microservices |
+| P1_AZURE_REACT_DOTNETCORE_CAKE_NUGETCONFIG_MVC_MONO | Azure DevOps | Cake | NuGet (packages.config) | Monolith |
+| P1_AZURE_REACT_DOTNETCORE_CAKE_NUGETCONFIG_MVC_MICRO | Azure DevOps | Cake | NuGet (packages.config) | Microservices |
+| P1_AZURE_REACT_DOTNETCORE_CLI_NUGETPKGREF_MVC_MONO | Azure DevOps | .NET CLI | NuGet (PackageReference) | Monolith |
+| P1_AZURE_REACT_DOTNETCORE_CLI_NUGETPKGREF_MVC_MICRO | Azure DevOps | .NET CLI | NuGet (PackageReference) | Microservices |
+| P1_AZURE_REACT_DOTNETCORE_CLI_CPM_MVC_MONO | Azure DevOps | .NET CLI | Central Package Management | Monolith |
+| P1_AZURE_REACT_DOTNETCORE_CLI_CPM_MVC_MICRO | Azure DevOps | .NET CLI | Central Package Management | Microservices |
+| P1_AZURE_REACT_DOTNETCORE_CLI_PAKET_MVC_MONO | Azure DevOps | .NET CLI | Paket | Monolith |
+| P1_AZURE_REACT_DOTNETCORE_CLI_PAKET_MVC_MICRO | Azure DevOps | .NET CLI | Paket | Microservices |
+| P1_AZURE_REACT_DOTNETCORE_CLI_NUGETCONFIG_MVC_MONO | Azure DevOps | .NET CLI | NuGet (packages.config) | Monolith |
+| P1_AZURE_REACT_DOTNETCORE_CLI_NUGETCONFIG_MVC_MICRO | Azure DevOps | .NET CLI | NuGet (packages.config) | Microservices |
+
+The SCM axis isn't label-only: each branch ships that platform's own CI
+config at the repo root (`.github/workflows/ci.yml`, `bitbucket-pipelines.yml`,
+`.gitlab-ci.yml`, or `azure-pipelines.yml`), and that config's build step
+invokes the branch's own build-tool command (e.g. the GitLab+Cake branch's
+`.gitlab-ci.yml` runs `dotnet cake RecordsApi/build.cake --target=Build`,
+while the GitHub+MSBuild branch's `ci.yml` runs
+`dotnet msbuild RecordsApi/RecordsApi.csproj -restore`).
+
+"Monolith" vs "Microservices" is a label only here too, same as the other
+two stacks in this repo — every branch ships the identical single
+`RecordsApi` service; the architecture note doesn't change the code, only
+how the branch's own README frames it.
+
+### Package-manager notes
+
+- **NuGet (PackageReference)**: the SDK-style default — `<PackageReference>`
+  items with explicit `Version` attributes in `RecordsApi.csproj`.
+- **Central Package Management**: a root `Directory.Packages.props` centralizes
+  versions (`ManagePackageVersionsCentrally=true`); `RecordsApi.csproj` lists
+  `<PackageReference>` items with no `Version` attribute.
+- **Paket**: a root `paket.dependencies` + `RecordsApi/paket.references`,
+  imported via `.paket/Paket.Restore.targets`.
+- **NuGet (packages.config)**: **substitution note** — `packages.config` is
+  not supported by SDK-style projects (`net8.0`, `Microsoft.NET.Sdk.Web`);
+  it's a legacy mechanism for non-SDK, `.NET Framework`-style `.csproj`
+  files only. This branch honestly keeps `PackageReference` (identical to
+  the NuGet (PackageReference) branch) and documents the substitution
+  rather than shipping a `packages.config` that .NET 8 would ignore.
+
+### Build-tool notes
+
+- **SDK-style MSBuild**: invoked directly via `dotnet msbuild` against the
+  SDK-style `.csproj`.
+- **Cake**: driven by `RecordsApi/build.cake` via the local `Cake.Tool` .NET
+  tool declared in `.config/dotnet-tools.json`.
+- **.NET CLI**: the plain `dotnet build`/`dotnet run` workflow, with the SDK
+  version pinned via a root `global.json`.
+
+### Verification status
+
+Unlike the other two stacks in this repo, this one was **not** fully
+build-verified. It was authored in a sandbox that could reach npm's
+registry but could **not** reach `nuget.org` (proxy returned 403 on every
+NuGet request). As a result:
+
+- **`ClientApp` (React/Vite) — verified.** `npm install` and `npm run build`
+  both completed successfully, on the template and on a spot-checked
+  generated branch.
+- **`RecordsApi` (.NET/EF Core/SQL Server) — unverified.** `dotnet restore`
+  could not complete (no NuGet access), so `dotnet build` could not be run.
+  The C# source, `.csproj` files, and package-manager/build-tool
+  configuration were written correctly from knowledge, following standard
+  ASP.NET Core 8 + EF Core + SQL Server patterns, but have not been
+  compiled in this environment. They should build normally wherever
+  `nuget.org` is reachable.
+
+Every branch's own README repeats this note under "Verification note" so
+it isn't lost when browsing a single branch in isolation.
+
+### Running any branch
+
+```bash
+git checkout <branch-name>
+docker compose up --build
+```
+
+or run the API and client locally — see the branch's own README for exact
+commands.
+
+### Generator
+
+`_generator/generate_project1_branches.py` — parameterised SCM/build
+tool/package manager/architecture, regenerates the 96-branch matrix from a
+template directory (`ClientApp/` + `RecordsApi/` + `docker-compose.yml` +
+`.gitignore`).

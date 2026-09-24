@@ -1,0 +1,15 @@
+image: mcr.microsoft.com/dotnet/sdk:8.0
+
+pipelines:
+  default:
+    - step:
+        name: Build API
+        script:
+          - dotnet msbuild RecordsApi/RecordsApi.csproj -restore -p:Configuration=Release
+    - step:
+        name: Build client
+        image: node:22
+        script:
+          - cd ClientApp
+          - npm ci
+          - npm run build

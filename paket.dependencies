@@ -1,0 +1,5 @@
+source https://api.nuget.org/v3/index.json
+
+nuget Swashbuckle.AspNetCore 6.6.2
+nuget Microsoft.EntityFrameworkCore.SqlServer 8.0.10
+nuget Microsoft.EntityFrameworkCore.Design 8.0.10

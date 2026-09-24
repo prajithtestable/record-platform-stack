@@ -1,0 +1,43 @@
+services:
+  sql-server:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: p1-sql-server
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Your_password123"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"Your_password123\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  records-api:
+    build:
+      context: ./RecordsApi
+      dockerfile: Dockerfile
+    container_name: p1-records-api
+    depends_on:
+      sql-server:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Default: "Server=sql-server,1433;Database=RecordsDb;User Id=sa;Password=Your_password123;TrustServerCertificate=True;"
+      ASPNETCORE_URLS: "http://+:8080"
+    ports:
+      - "8080:8080"
+
+  client-app:
+    build:
+      context: ./ClientApp
+      dockerfile: Dockerfile
+    container_name: p1-client-app
+    depends_on:
+      - records-api
+    ports:
+      - "5173:80"
+
+volumes:
+  sql-data:

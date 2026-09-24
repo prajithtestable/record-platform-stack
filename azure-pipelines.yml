@@ -1,0 +1,25 @@
+trigger:
+  branches:
+    include:
+      - '*'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - task: UseDotNet@2
+    inputs:
+      version: '8.0.x'
+
+  - script: dotnet build RecordsApi/RecordsApi.csproj -c Release
+    displayName: 'Build API'
+
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '22.x'
+
+  - script: |
+      cd ClientApp
+      npm ci
+      npm run build
+    displayName: 'Build client'

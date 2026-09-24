@@ -1,0 +1,13 @@
+# .NET
+RecordsApi/bin/
+RecordsApi/obj/
+RecordsApi/.paket/paket.exe
+
+# Node / React
+ClientApp/node_modules/
+ClientApp/dist/
+
+# IDE
+.vs/
+.vscode/
+*.user

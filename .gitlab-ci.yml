@@ -1,0 +1,16 @@
+stages:
+  - build
+
+build-api:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  script:
+    - dotnet build RecordsApi/RecordsApi.csproj -c Release
+
+build-client:
+  stage: build
+  image: node:22
+  script:
+    - cd ClientApp
+    - npm ci
+    - npm run build
